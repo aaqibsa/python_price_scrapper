@@ -6,10 +6,10 @@ After=network-online.target
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/python-scrapper
-EnvironmentFile=/var/www/python-scrapper/.env
-Environment="PATH=/var/www/python-scrapper/venv/bin"
-ExecStart=/var/www/python-scrapper/venv/bin/gunicorn -w 3 -k gthread -b 0.0.0.0:${PORT} --access-logfile - --error-logfile - app.url_manager:app
+WorkingDirectory=/var/www/html/python_price_scrapper
+EnvironmentFile=/var/www/html/python_price_scrapper/.env
+Environment="PATH=/var/www/html/python_price_scrapper/venv/bin"
+ExecStart=/var/www/html/python_price_scrapper/venv/bin/gunicorn -w 3 -k gthread -b 0.0.0.0:${PORT} --access-logfile - --error-logfile - app.url_manager:app
 Restart=always
 RestartSec=5
 TimeoutStopSec=15

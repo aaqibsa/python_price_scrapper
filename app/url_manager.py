@@ -265,6 +265,26 @@ def get_scraper_status():
     return jsonify(scraper_status)
 
 
+@app.route('/admin/screenshot')
+def view_screenshot():
+    """View the latest screenshot from scraping"""
+    auth = request.authorization
+    if not auth or not check_auth(auth.username, auth.password):
+        return authenticate()
+    
+    import os
+    from flask import send_from_directory
+    
+    # Get the project root directory (one level up from app/)
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    screenshot_path = os.path.join(project_root, 'test2.png')
+    
+    if os.path.exists(screenshot_path):
+        return send_from_directory(project_root, 'test2.png')
+    else:
+        return "Screenshot not found. Run the scraper first to generate a screenshot.", 404
+
+
 def start_server():
     """Start the Flask server"""
     connect_to_mongo()
@@ -273,3 +293,5 @@ def start_server():
 
 if __name__ == '__main__':
     start_server()
+else:
+    connect_to_mongo()
