@@ -17,8 +17,9 @@ if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
 fi
 
+# send logs to a file
 # Run the scraper
-python scrape_price.py
+python scrape_price.py >> scrape_price.log 2>&1
 
 # Deactivate virtual environment
 deactivate
