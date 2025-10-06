@@ -237,7 +237,7 @@ class PriceScraper:
                 except Exception as nav_error:
                     print(f"Navigation error on attempt {attempt + 1}: {nav_error}")
                     if attempt < max_retries - 1:
-                        await self._cleanup_browser(playwright, browser, context, page, use_brightdata)
+                        await self._cleanup_browser(playwright, browser, context, page)
                         # Use exponential backoff with jitter
                         wait_time = (2 ** attempt) + random.uniform(1, 3)
                         print(f"Retrying in {wait_time:.1f} seconds...")
@@ -285,7 +285,7 @@ class PriceScraper:
                             print(f"Product Price for {url}: {price}")
                             # Store in MongoDB
                             await self.store_in_mongo({'url': url, 'sku': sku, 'price': price})
-                            await self._cleanup_browser(playwright, browser, context, page, use_brightdata)
+                            await self._cleanup_browser(playwright, browser, context, page)
                             return  # Success, exit retry loop
                         else:
                             print(f"Price not found in JSON for {url}.")
@@ -306,13 +306,13 @@ class PriceScraper:
                         price = float(price_match.group())
                         print(f"Product Price for {url} (fallback): {price}")
                         await self.store_in_mongo({'url': url, 'sku': None, 'price': price})
-                        await self._cleanup_browser(playwright, browser, context, page, use_brightdata)
+                        await self._cleanup_browser(playwright, browser, context, page)
                         return
                 
                 # If we reach here, the page loaded but no price was found
                 # This is not a network error, so don't retry
                 print(f"Could not extract price from {url}")
-                await self._cleanup_browser(playwright, browser, context, page, use_brightdata)
+                await self._cleanup_browser(playwright, browser, context, page)
                 return
 
             except Exception as error:
@@ -332,7 +332,7 @@ class PriceScraper:
                 elif "net::ERR_" in error_msg:
                     print("  -> Network error detected - may be proxy-related")
                 
-                await self._cleanup_browser(playwright, browser, context, page, use_brightdata)
+                await self._cleanup_browser(playwright, browser, context, page)
                 if attempt < max_retries - 1:
                     # Wait before retrying with exponential backoff and jitter
                     wait_time = (2 ** attempt) + random.uniform(2, 8)
@@ -343,7 +343,7 @@ class PriceScraper:
                     # Log the failed URL for manual inspection
                     print(f"Consider checking this URL manually: {url}")
 
-    async def _cleanup_browser(self, playwright, browser, context, page, is_brightdata=False):
+    async def _cleanup_browser(self, playwright, browser, context, page):
         """Clean up browser resources"""
         try:
             if page:
@@ -351,12 +351,7 @@ class PriceScraper:
             if context:
                 await context.close()
             if browser:
-                if is_brightdata:
-                    # For BrightData CDP connection, just close the browser
-                    await browser.close()
-                else:
-                    # For local browser, close normally
-                    await browser.close()
+                await browser.close()
             if playwright:
                 await playwright.stop()
         except Exception as e:

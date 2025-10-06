@@ -1,20 +1,18 @@
 [Unit]
-Description=Price scrapper
-After=network.target
+Description=Price Scrapper
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 User=www-data
+Group=www-data
 WorkingDirectory=/var/www/python-scrapper
-ExecStart=/var/www/python-scrapper/.venv/bin/uvicorn \
-          main:url-manager \
-          --host 0.0.0.0 \
-          --port 8080 \
-          --workers 4 \
-          --proxy-headers
-Environment="PATH=/var/www/python-scrapper/.venv/bin"
 EnvironmentFile=/var/www/python-scrapper/.env
+Environment="PATH=/var/www/python-scrapper/venv/bin"
+ExecStart=/var/www/python-scrapper/venv/bin/gunicorn -w 3 -k gthread -b 0.0.0.0:${PORT} --access-logfile - --error-logfile - app.url_manager:app
 Restart=always
 RestartSec=5
+TimeoutStopSec=15
 
 # Security hardening
 NoNewPrivileges=true
