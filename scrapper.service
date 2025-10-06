@@ -1,0 +1,26 @@
+[Unit]
+Description=Price scrapper
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/python-scrapper
+ExecStart=/var/www/python-scrapper/.venv/bin/uvicorn \
+          main:url-manager \
+          --host 0.0.0.0 \
+          --port 8080 \
+          --workers 4 \
+          --proxy-headers
+Environment="PATH=/var/www/python-scrapper/.venv/bin"
+EnvironmentFile=/var/www/python-scrapper/.env
+Restart=always
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
